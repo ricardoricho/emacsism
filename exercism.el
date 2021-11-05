@@ -6,6 +6,14 @@
 
 (require 'subr-x)
 
+(defvar exercism-command-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "d") #'exercism-download)
+    (define-key map (kbd "f") #'exercism-find-exercise)
+    (define-key map (kbd "s") #'exercism-submit)
+    map))
+(fset 'exercism-command-map exercism-command-map)
+
 (defvar exercism--current-workspace nil
   "Store the current workspace of exercism.
 The output of 'exercism workspace'.")
