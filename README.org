@@ -1,0 +1,5 @@
+#+TITLE: Emacsism
+
+[[https://www.gnu.org/software/emacs/][Emacs]] + [[https://excersim.org][Excersim]]
+
+A wrapper for exercism [[https://exercism.org/cli-walkthrough][CLI]].
