@@ -15,6 +15,7 @@
   :group 'emacsism
   :type 'string)
 
+;;;###autoload;
 (defvar emacsism-command-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "d") #'emacsism-download-and-open)
@@ -23,7 +24,6 @@
     (define-key map (kbd "t") #'emacsism-test)
     map)
   "Emacsism prefix keymap.")
-(fset 'emacsism-command-map emacsism-command-map)
 
 (defvar emacsism-mode-map
   (let ((map (make-sparse-keymap)))
