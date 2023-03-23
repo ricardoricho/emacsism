@@ -15,6 +15,11 @@
   :group 'emacsism
   :type 'string)
 
+(defcustom emacsism-container-command nil
+  "Container commad, for example: docker, podman, etc."
+  :group 'emacsism
+  :type 'string)
+
 ;;;###autoload;
 (defvar emacsism-command-map
   (let ((map (make-sparse-keymap)))
@@ -102,6 +107,21 @@
     (message submit-command)
     (shell-command submit-command)))
 
+(defun emacsism--container-attributes (track exercise)
+  "Command to run TRACK container with attributes for EXERCISE."
+  (when emacsism-container-command
+    (concat emacsism-container-command " run "
+            (emacsism--container-run-options track exercise) " "
+            (emacsism--container-name track) " ")))
+
+(defun emacsism--container-run-options (track exercise)
+  "Format options to run TRACK EXERCISE."
+  (format "-v %s:/%s" (emacsism--exercise-path track exercise) track))
+
+(defun emacsism--container-name (track)
+  "Emacsism container name for TRACK."
+  (concat "emacsism-" track))
+
 (defun emacsism-test (&optional exercise)
   "Run the current EXERCISE test.
 Depending on the `major-mode' where the buffer is execute the corresponding
@@ -123,7 +143,8 @@ the `default-directory'."
   (emacsism--run-command "elixir" exercise "mix test"))
 
 (defun emacsism--run-emacs-lisp-tests (exercise)
-  "Run test file for emacs-lisp EXERCISE.  Run the test as batch and show results in new buffer."
+  "Run test file for emacs-lisp EXERCISE.
+Run the test as batch and show results in new buffer."
   (emacsism--run-command
    "emacs-lisp" exercise
    (format "emacs -batch -l ert -l %s-test.el -f ert-run-tests-batch-and-exit" exercise)))
@@ -155,11 +176,21 @@ the `default-directory'."
 Execute COMMAND (general for testing) with the EXERCISE path as
 `default-directory'.  The new buffer named *emacsism-TRACK-EXERCISE*
 run with `compilation-mode' for results."
-  (let ((test-buffer  (get-buffer-create (concat "*emacsism-" track "-" exercise "*")))
-        (default-directory (emacsism--exercise-path track exercise)))
-    (shell-command command test-buffer)
+  (let* ((test-buffer
+          (get-buffer-create (concat "*emacsism-" track "-" exercise "*")))
+         (default-directory (emacsism--exercise-path track exercise))
+         (container-prefix (emacsism--container-attributes track exercise))
+         (execute-command (concat container-prefix
+                                  (if container-prefix
+                                      (format "\"%s\"" command)
+                                    command))))
     (switch-to-buffer-other-window test-buffer)
-    (with-current-buffer test-buffer (compilation-mode))))
+    (message "Emacsism: %s" execute-command)
+    (with-current-buffer test-buffer
+      (setq buffer-read-only nil)
+      (erase-buffer)
+      (shell-command execute-command test-buffer)
+      (compilation-mode))))
 
 (defun emacsism--track-path (track)
   "Return the path of the TRACK.
