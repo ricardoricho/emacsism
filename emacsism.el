@@ -164,11 +164,10 @@ Run the test as batch and show results in new buffer."
    "prolog" exercise
    (format "swipl -f %s.pl -s %s_tests.plt -g run_tests,halt -t 'halt(1)'" exercise exercise)))
 
-(defun emacsism--run-python-tests (exercise)
-  "Run test file for python EXERCISE."
-  (emacsism--run-command
-   "python" (replace-regexp-in-string "_" "-" exercise)
-   (format "python3 %s_test.py" exercise)))
+(defun emacsism--run-python-tests (file)
+  "Run test FILE for python exercise."
+  (let ((exercise (emacsism--exercise-name "python" file)))
+    (emacsism--run-command "python" exercise "pytest")))
 
 (defun emacsism--run-ruby-tests (exercise)
   "Run test file for ruby EXERCISE."
