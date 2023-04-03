@@ -122,6 +122,14 @@
   "Emacsism container name for TRACK."
   (concat "emacsism-" track))
 
+(defun emacsism--exercise-name (track file)
+  "Get TRACK exercise name from FILE path."
+  (let* ((directory (expand-file-name file))
+         (track-match (string-match track directory))
+         (exercise-path (substring directory (+ 1 track-match (length track))))
+         (rest-match (string-match "/" exercise-path)))
+    (substring exercise-path 0 rest-match)))
+
 (defun emacsism-test (&optional exercise)
   "Run the current EXERCISE test.
 Depending on the `major-mode' where the buffer is execute the corresponding
@@ -136,6 +144,7 @@ the `default-directory'."
      ((eq 'prolog-mode major-mode) (emacsism--run-prolog-tests exercise-name))
      ((eq 'python-mode major-mode) (emacsism--run-python-tests exercise-name))
      ((eq 'ruby-mode major-mode) (emacsism--run-ruby-tests exercise-name))
+     ((eq 'rust-mode major-mode) (emacsism--run-rust-tests exercise-name))
      (t (error "Not command defined to run %s tests" major-mode)))))
 
 (defun emacsism--run-elixir-tests (exercise)
@@ -166,6 +175,11 @@ Run the test as batch and show results in new buffer."
   (emacsism--run-command
    "ruby" exercise
    (format "ruby %s_test.rb" exercise)))
+
+(defun emacsism--run-rust-tests (file)
+  "Run test file for rust FILE."
+  (let ((exercise (emacsism--exercise-name "rust" file)))
+    (emacsism--run-command "rust" exercise "cargo test")))
 
 (defun emacsism--run-java-tests (exercise)
   "Run test file for java EXERCISE."
