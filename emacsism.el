@@ -78,6 +78,33 @@
      (expand-file-name "README.md" (mapconcat 'file-name-as-directory
                                               (list workspace track exercise) nil)))))
 
+
+(defun emacsism-url-download (url)
+  "Download track exercise from URL."
+  (interactive (list (read-string "URL: ")))
+  (let* ((url-regexp (emacsism--exercism-url-regexp))
+         (match (string-match url-regexp url)))
+    (if match
+        (let ((track (match-string 1 url))
+              (exercise (match-string 2 url)))
+          (emacsism-download track exercise))
+      (error "Not a exercism url"))))
+
+(defun emacsism-url-download-and-open (url)
+  "Download track exercise from URL."
+  (interactive (list (read-string "URL: ")))
+  (let* ((url-regexp (emacsism--exercism-url-regexp))
+         (match (string-match url-regexp url)))
+    (if match
+        (let ((track (match-string 1 url))
+              (exercise (match-string 2 url)))
+          (emacsism-download-and-open track exercise))
+      (error "Not a exercism url."))))
+
+(defun emacsism--exercism-url-regexp ()
+  "Return a regexp that match exersicm urls."
+  "https://exercism.org/tracks/\\(.+\\)/exercises/\\(.+\\)")
+
 (defun emacsism-download (track exercise)
   "Download the `EXERCISE' from the corresponding `TRACK'."
   (interactive (list (completing-read "Track:" (emacsism--tracks))
