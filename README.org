@@ -3,3 +3,33 @@
 [[https://www.gnu.org/software/emacs/][Emacs]] + [[https://excersim.org][Excersim]]
 
 A wrapper for exercism [[https://exercism.org/cli-walkthrough][CLI]].
+
+* Installation
+
+** Manual instalation
+
+Clone the repository
+
+#+begin_src sh
+  git clone https://git.sr.ht/~richo/emacsism
+#+end_src
+
+Add to source-list
+
+#+begin_src emacs-lisp
+  (add-to-list load-path "Path where clone is.")
+#+end_src
+
+Require the package
+
+#+begin_src emacs-lisp
+  (require 'emacsism)
+#+end_src
+
+** Using straight
+
+#+begin_src emacs-lisp
+  (use-package emacsism
+    :straight (emacsism :host sourcehut :repo richo/emacsism))
+#+end_src
+
