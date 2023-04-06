@@ -30,6 +30,28 @@ Require the package
 
 #+begin_src emacs-lisp
   (use-package emacsism
-    :straight (emacsism :host sourcehut :repo richo/emacsism))
+    :straight (emacsism :host github :repo ricardoricho/emacsism)
+    :bind-keymap (("C-c E" . emacsism-command-map))
+    :config
+    (emacsism-mode))
 #+end_src
+
+* Usage
+
+Emacsism relies on the ~excersism-cli~ package to be install.
+When emacsism activated ~emacsism-mode~ it checks installation and if missing
+runs an error. To install ~exercsims-cli~ got to
+https://exercism.org/cli-walkthrough
+
+Once installed and required emacsism provide this functions:
+  - ~emacsism-url-download-and-open~: Download and open ~Readme.md~ file from
+    the url, example: ~(emacsism-url-download-and-open "url")~ the function is
+    interactive so with: ~M-x emacsism-url-download-and-open~ it ask for the url.
+  - ~emacsism-download-and-open~: Interactive function that ask for the track
+    and exercise to download and open ~Readme.md~ file.
+
+  - ~emacism-test~: Also an interactive function that, when called from the
+    exercise file, run the test depending on the file ~major-mode~ for example,
+    if ~major-mode~ is ~python-mode~ it runs ~pytest~ from the exercise
+    directory and shows the results in a new buffer.
 
