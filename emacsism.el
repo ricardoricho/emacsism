@@ -168,6 +168,7 @@ the `default-directory'."
     (cond
      ((eq 'elixir-mode major-mode) (emacsism--run-elixir-tests exercise-name))
      ((eq 'emacs-lisp-mode major-mode) (emacsism--run-emacs-lisp-tests exercise-name))
+     ((eq 'java-mode major-mode) (emacsism--run-java-tests exercise-name))
      ((eq 'prolog-mode major-mode) (emacsism--run-prolog-tests exercise-name))
      ((eq 'python-mode major-mode) (emacsism--run-python-tests exercise-name))
      ((eq 'ruby-mode major-mode) (emacsism--run-ruby-tests exercise-name))
@@ -207,9 +208,10 @@ Run the test as batch and show results in new buffer."
   (let ((exercise (emacsism--exercise-name "rust" file)))
     (emacsism--run-command "rust" exercise "cargo test")))
 
-(defun emacsism--run-java-tests (exercise)
-  "Run test file for java EXERCISE."
-  (emacsism--run-command "java" exercise "gradle test"))
+(defun emacsism--run-java-tests (file)
+  "Run test file for java FILE."
+  (let ((exercise (emacsism--exercise-name "java" file)))
+    (emacsism--run-command "java" exercise "gradle test")))
 
 (defun emacsism--run-command (track exercise command)
   "Call COMMAND and show results in a TRACK EXERCISE buffer.
