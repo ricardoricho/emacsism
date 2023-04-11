@@ -78,7 +78,6 @@
      (expand-file-name "README.md" (mapconcat 'file-name-as-directory
                                               (list workspace track exercise) nil)))))
 
-
 (defun emacsism-url-download (url)
   "Download track exercise from URL."
   (interactive (list (read-string "URL: ")))
@@ -99,7 +98,7 @@
         (let ((track (match-string 1 url))
               (exercise (match-string 2 url)))
           (emacsism-download-and-open track exercise))
-      (error "Not a exercism url."))))
+      (error "Not an exercism url"))))
 
 (defun emacsism--exercism-url-regexp ()
   "Return a regexp that match exersicm urls."
@@ -157,63 +156,68 @@
          (rest-match (string-match "/" exercise-path)))
     (substring exercise-path 0 rest-match)))
 
-(defun emacsism-test (&optional exercise)
-  "Run the current EXERCISE test.
-Depending on the `major-mode' where the buffer is execute the corresponding
-emacsism test command, usually named `emacsism--run-TRACK-test' with EXERCISE.
-With the last sentences it make sense to better find the track named based on
-the `default-directory'."
+(defun emacsism--track-name (file)
+  "Get track from FILE."
+  (message "File is %s" file)
+  (let* ((workspace (emacsism-workspace))
+         (track-rest (substring file (+ 1 (length workspace))))
+         (exercise-rest (string-match "/" track-rest)))
+    (message "track-rest:: %s" track-rest)
+    (substring track-rest 0 exercise-rest)))
+
+
+(defun emacsism-test ()
+  "Run the current exercise test.
+According to current buffer file, found the track and exercise.
+Then for the track found run `emacissm--run-track-tests' with exercise."
   (interactive)
-  (let ((exercise-name (or exercise (file-name-base (buffer-file-name)))))
-    (cond
-     ((eq 'elixir-mode major-mode) (emacsism--run-elixir-tests exercise-name))
-     ((eq 'emacs-lisp-mode major-mode) (emacsism--run-emacs-lisp-tests exercise-name))
-     ((eq 'java-mode major-mode) (emacsism--run-java-tests exercise-name))
-     ((eq 'prolog-mode major-mode) (emacsism--run-prolog-tests exercise-name))
-     ((eq 'python-mode major-mode) (emacsism--run-python-tests exercise-name))
-     ((eq 'ruby-mode major-mode) (emacsism--run-ruby-tests exercise-name))
-     ((eq 'rust-mode major-mode) (emacsism--run-rust-tests exercise-name))
-     (t (error "Not command defined to run %s tests" major-mode)))))
+  (let* ((current-file (expand-file-name (buffer-file-name)))
+         (current-track (emacsism--track-name current-file))
+         (current-exercise
+          (emacsism--exercise-name current-track current-file))
+         (test-command
+          (intern (concat "emacsism--run-" current-track "-tests"))))
+    (funcall test-command current-exercise)))
+
+
+;; Runners
 
 (defun emacsism--run-elixir-tests (exercise)
   "Run test file for elixir EXERCISE."
-  (emacsism--run-command "elixir" exercise "mix test"))
+  (emacsism--run-command "mix test" "elixir" exercise))
 
 (defun emacsism--run-emacs-lisp-tests (exercise)
   "Run test file for emacs-lisp EXERCISE.
 Run the test as batch and show results in new buffer."
-  (emacsism--run-command
-   "emacs-lisp" exercise
-   (format "emacs -batch -l ert -l %s-test.el -f ert-run-tests-batch-and-exit" exercise)))
+  (let* ((string-command (concat "emacs -batch -l ert -l %s-test.el -f "
+                                "ert-run-tests-batch-and-exit"))
+         (test-command (format string-command exercise)))
+    (emacsism--run-command test-command "emacs-lisp" exercise)))
 
 (defun emacsism--run-prolog-tests (exercise)
   "Run test file for prolog EXERCISE."
-  (emacsism--run-command
-   "prolog" exercise
-   (format "swipl -f %s.pl -s %s_tests.plt -g run_tests,halt -t 'halt(1)'" exercise exercise)))
+  (let* ((string-command (concat "swipl -f %s.pl -s %s_tests.plt"
+                                 "-g run_tests,halt -t 'halt(1)'"))
+         (test-command (format string-command exercise)))
+    (emacsism--run-command test-command "prolog" exercise)))
 
-(defun emacsism--run-python-tests (file)
-  "Run test FILE for python exercise."
-  (let ((exercise (emacsism--exercise-name "python" file)))
-    (emacsism--run-command "python" exercise "pytest")))
+(defun emacsism--run-python-tests (exercise)
+  "Run test file for python EXERCISE."
+  (emacsism--run-command "pytest" "python" exercise))
 
 (defun emacsism--run-ruby-tests (exercise)
   "Run test file for ruby EXERCISE."
-  (emacsism--run-command
-   "ruby" exercise
-   (format "ruby %s_test.rb" exercise)))
+  (emacsism--run-command (format "ruby %s_test.rb" exercise) "ruby" exercise))
 
-(defun emacsism--run-rust-tests (file)
-  "Run test file for rust FILE."
-  (let ((exercise (emacsism--exercise-name "rust" file)))
-    (emacsism--run-command "rust" exercise "cargo test")))
+(defun emacsism--run-rust-tests (exercise)
+  "Run test file for rust EXERCISE."
+  (emacsism--run-command "cargo test" "rust" exercise))
 
-(defun emacsism--run-java-tests (file)
-  "Run test file for java FILE."
-  (let ((exercise (emacsism--exercise-name "java" file)))
-    (emacsism--run-command "java" exercise "gradle test")))
+(defun emacsism--run-java-tests (exercise)
+  "Run test file for java EXERCISE."
+  (emacsism--run-command "gradle test" "java" exercise))
 
-(defun emacsism--run-command (track exercise command)
+(defun emacsism--run-command (command track exercise)
   "Call COMMAND and show results in a TRACK EXERCISE buffer.
 Execute COMMAND (general for testing) with the EXERCISE path as
 `default-directory'.  The new buffer named *emacsism-TRACK-EXERCISE*
@@ -241,15 +245,8 @@ That is the workspace-directory with the appended track name."
 
 (defun emacsism--exercise-path (track exercise)
   "Return the EXERCISE path found in TRACK."
-  (let ((exercise-dir (emacsism--format-dir track exercise)))
-    (expand-file-name exercise-dir (emacsism--track-path track))))
-
-(defun emacsism--format-dir (track exercise)
-  "Return the correspoding format for an EXERCISE directory of a given TRACK."
-  (cond
-   ((equal track "ruby") (replace-regexp-in-string "_" "-" exercise))
-   ((equal track "elixir") (replace-regexp-in-string "_" "-" exercise))
-   (t exercise)))
+  (let ((exercise-name (emacsism--exercise-name track exercise)))
+    (expand-file-name exercise-name (emacsism--track-path track))))
 
 (defun emacsism--tracks-list ()
   "Hardcoded list of tracks."

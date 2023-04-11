@@ -6,7 +6,7 @@ A wrapper for exercism [[https://exercism.org/cli-walkthrough][CLI]].
 
 * Installation
 
-** Manual instalation
+** Manual installation
 
 Clone the repository
 
@@ -38,15 +38,15 @@ Require the package
 
 * Usage
 
-Emacsism relies on the ~excersism-cli~ package to be install.
+Emacsism relies on the ~excersism-cli~ package to be installed.
 When emacsism activated ~emacsism-mode~ it checks installation and if missing
 runs an error. To install ~exercsims-cli~ got to
 https://exercism.org/cli-walkthrough
 
 Once installed and required emacsism provide this functions:
   - ~emacsism-url-download-and-open~: Download and open ~Readme.md~ file from
-    the url, example: ~(emacsism-url-download-and-open "url")~ the function is
-    interactive so with: ~M-x emacsism-url-download-and-open~ it ask for the url.
+    the URL, example: ~(emacsism-url-download-and-open "URL")~ the function is
+    interactive so with: ~M-x emacsism-url-download-and-open~ it asks for the URL.
   - ~emacsism-download-and-open~: Interactive function that ask for the track
     and exercise to download and open ~Readme.md~ file.
 
