@@ -55,8 +55,8 @@
 (defun emacsism--check-install ()
   "Check if emacsism is installed."
   (cond
-   ((null emacsism-keymap-prefix)
-    (progn (message "Undefined `emacsism-keymap-prefix'")
+   ((string-empty-p (shell-command-to-string "command -v exercism"))
+    (progn (error "Undefined `exercism' command")
            (emacsism-mode -1)))
    (t (message "Emacsism good... "))))
 
