@@ -179,6 +179,34 @@ Then for the track found run `emacissm--run-track-tests' with exercise."
           (intern (concat "emacsism--run-" current-track "-tests"))))
     (funcall test-command current-exercise)))
 
+(defun emacsism--run-command (command track exercise)
+  "Call COMMAND and show results in a TRACK EXERCISE buffer.
+Execute COMMAND (general for testing) with the EXERCISE path as
+`default-directory'.  The new buffer named *emacsism-TRACK-EXERCISE*
+run with `compilation-mode' for results."
+  (let* ((test-buffer
+          (get-buffer-create (concat "*emacsism-" track "-" exercise "*")))
+         (default-directory (emacsism--exercise-path track exercise))
+         (container-prefix (emacsism--container-attributes track exercise))
+         (execute-command (concat container-prefix
+                                  (if container-prefix
+                                      (format "\"%s\"" command)
+                                    command))))
+    (message "Emacsism: %s" execute-command)
+    (with-current-buffer test-buffer
+      (setq buffer-read-only nil)
+      (erase-buffer)
+      (async-shell-command execute-command test-buffer))))
+
+(defun emacsism--track-path (track)
+  "Return the path of the TRACK.
+That is the workspace-directory with the appended track name."
+  (expand-file-name track (emacsism-workspace)))
+
+(defun emacsism--exercise-path (track exercise)
+  "Return the EXERCISE path found in TRACK."
+  (let ((exercise-name (emacsism--exercise-name track exercise)))
+    (expand-file-name exercise-name (emacsism--track-path track))))
 
 ;; Runners
 
@@ -217,35 +245,6 @@ Run the test as batch and show results in new buffer."
 (defun emacsism--run-java-tests (exercise)
   "Run test file for java EXERCISE."
   (emacsism--run-command "gradle test" "java" exercise))
-
-(defun emacsism--run-command (command track exercise)
-  "Call COMMAND and show results in a TRACK EXERCISE buffer.
-Execute COMMAND (general for testing) with the EXERCISE path as
-`default-directory'.  The new buffer named *emacsism-TRACK-EXERCISE*
-run with `compilation-mode' for results."
-  (let* ((test-buffer
-          (get-buffer-create (concat "*emacsism-" track "-" exercise "*")))
-         (default-directory (emacsism--exercise-path track exercise))
-         (container-prefix (emacsism--container-attributes track exercise))
-         (execute-command (concat container-prefix
-                                  (if container-prefix
-                                      (format "\"%s\"" command)
-                                    command))))
-    (message "Emacsism: %s" execute-command)
-    (with-current-buffer test-buffer
-      (setq buffer-read-only nil)
-      (erase-buffer)
-      (async-shell-command execute-command test-buffer))))
-
-(defun emacsism--track-path (track)
-  "Return the path of the TRACK.
-That is the workspace-directory with the appended track name."
-  (expand-file-name track (emacsism-workspace)))
-
-(defun emacsism--exercise-path (track exercise)
-  "Return the EXERCISE path found in TRACK."
-  (let ((exercise-name (emacsism--exercise-name track exercise)))
-    (expand-file-name exercise-name (emacsism--track-path track))))
 
 (defun emacsism--tracks-list ()
   "Hardcoded list of tracks."

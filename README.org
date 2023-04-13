@@ -11,7 +11,7 @@ A wrapper for exercism [[https://exercism.org/cli-walkthrough][CLI]].
 Clone the repository
 
 #+begin_src sh
-  git clone https://git.sr.ht/~richo/emacsism
+  git clone https://github.com/ricardoricho/emacsism
 #+end_src
 
 Add to source-list
@@ -50,8 +50,25 @@ Once installed and required emacsism provide this functions:
   - ~emacsism-download-and-open~: Interactive function that ask for the track
     and exercise to download and open ~Readme.md~ file.
 
-  - ~emacism-test~: Also an interactive function that, when called from the
-    exercise file, run the test depending on the file ~major-mode~ for example,
-    if ~major-mode~ is ~python-mode~ it runs ~pytest~ from the exercise
-    directory and shows the results in a new buffer.
+  - ~emacsism-find-exercise~: Ask for the track and exercise that already been
+    downloaded and open the README.md file of exercise.
 
+  - ~emacism-test~: Also an interactive function that, when called from a file
+    inside the exercise directory, it will run the test depending
+    directory-path from that file. The results are shown in a buffer for that
+    exercise and track.
+
+* Container.
+
+When ~emacsism-container-command~ is present, as ~"podman"~ or ~"docker"~ or
+similar but not ~nil~. The tests will run in a container named ~emacsism-track~ where the ~track~ is
+the name of the exercise track. For example, in a rust exercise, a container
+~emacsism-rust~ musts exist, and it will run the ~cargo test~ command for the
+current exercise.
+
+Simple images could be found in the ~containers~ directory. To build one of them
+use:
+
+#+begin_src sh
+  docker build ./containers/python -t emacsism-python
+#+end_src
