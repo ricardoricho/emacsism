@@ -207,7 +207,8 @@ Run the test as batch and show results in new buffer."
 
 (defun emacsism--run-ruby-tests (exercise)
   "Run test file for ruby EXERCISE."
-  (emacsism--run-command (format "ruby %s_test.rb" exercise) "ruby" exercise))
+  (let ((exercise-name (replace-regexp-in-string "-" "_" exercise)))
+    (emacsism--run-command (format "ruby %s_test.rb" exercise-name) "ruby" exercise-name)))
 
 (defun emacsism--run-rust-tests (exercise)
   "Run test file for rust EXERCISE."
