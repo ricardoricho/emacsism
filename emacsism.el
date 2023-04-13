@@ -231,13 +231,11 @@ run with `compilation-mode' for results."
                                   (if container-prefix
                                       (format "\"%s\"" command)
                                     command))))
-    (switch-to-buffer-other-window test-buffer)
     (message "Emacsism: %s" execute-command)
     (with-current-buffer test-buffer
       (setq buffer-read-only nil)
       (erase-buffer)
-      (shell-command execute-command test-buffer)
-      (compilation-mode))))
+      (async-shell-command execute-command test-buffer))))
 
 (defun emacsism--track-path (track)
   "Return the path of the TRACK.
