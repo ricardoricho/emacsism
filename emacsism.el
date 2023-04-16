@@ -224,9 +224,9 @@ Run the test as batch and show results in new buffer."
 
 (defun emacsism--run-prolog-tests (exercise)
   "Run test file for prolog EXERCISE."
-  (let* ((string-command (concat "swipl -f %s.pl -s %s_tests.plt"
+  (let* ((string-command (concat "swipl -f %s.pl -s %s_tests.plt "
                                  "-g run_tests,halt -t 'halt(1)'"))
-         (test-command (format string-command exercise)))
+         (test-command (format string-command exercise exercise)))
     (emacsism--run-command test-command "prolog" exercise)))
 
 (defun emacsism--run-python-tests (exercise)
