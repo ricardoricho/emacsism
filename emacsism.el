@@ -23,7 +23,7 @@
 ;;;###autoload;
 (defvar emacsism-command-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "d") #'emacsism-download-and-open)
+    (define-key map (kbd "d") #'emacsism-url-download-and-open)
     (define-key map (kbd "f") #'emacsism-find-exercise)
     (define-key map (kbd "s") #'emacsism-submit)
     (define-key map (kbd "t") #'emacsism-test)
