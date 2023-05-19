@@ -214,6 +214,10 @@ That is the workspace-directory with the appended track name."
   "Run test file for elixir EXERCISE."
   (emacsism--run-command "mix test" "elixir" exercise))
 
+(defun emacsism--run-clojure-tests (exercise)
+  "Run test file for clojure EXERCISE."
+  (emacsism--run-command "lein test" "clojure" exercise))
+
 (defun emacsism--run-emacs-lisp-tests (exercise)
   "Run test file for emacs-lisp EXERCISE.
 Run the test as batch and show results in new buffer."
