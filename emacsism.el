@@ -52,6 +52,13 @@
   (let ((current-workspace (shell-command-to-string "exercism workspace")))
     (string-trim current-workspace)))
 
+(defun emacsism--library-dir ()
+  "Return directory where this source file is located."
+  (let* ((emacsism-buffer (find-library "emacsism"))
+         (emacsism-file (buffer-file-name emacsism-buffer))
+         (emacsism-truefile (file-truename emacsism-file)))
+    (file-name-directory emacsism-truefile)))
+
 (defun emacsism--check-install ()
   "Check if emacsism is installed."
   (cond
@@ -71,7 +78,7 @@
 
 (defun emacsism-find-exercise (track &optional exercise)
   "Open `find-file' in readme file of the EXERCISE in TRACK directory."
-  (interactive (list (completing-read "Track:" (emacsism--tracks))))
+  (interactive (list (completing-read "Track: " (emacsism--tracks))))
   (let ((workspace (emacsism-workspace))
         (exercise (or exercise (completing-read "Exercise:" (emacsism--exercises track)))))
     (find-file
@@ -165,6 +172,24 @@
     (message "track-rest:: %s" track-rest)
     (substring track-rest 0 exercise-rest)))
 
+(defun emacsism-build-container (track)
+  "Build emacsism TRACK container to running exercise test."
+  (interactive (list (completing-read "Track: " (emacsism--tracks))))
+  (when (null emacsism-container-command)
+    (error "Variable `emacsism-container-command' is nil"))
+  (let ((default-directory (emacsism--library-dir))
+        (container-name (emacsism--container-name track))
+        (build-buffer
+         (get-buffer-create (format "*emacsism--container-build-%s*" track)))
+        (build-command-name (format "build-%s" track))
+        (container-path (expand-file-name (format "containers/%s" track))))
+        (message "Build: %s build -t %s %s" emacsism-container-command
+                 container-name container-path)
+        (start-process build-command-name build-buffer
+                       emacsism-container-command
+                       "build" "-t" container-name
+                       container-path)
+        (switch-to-buffer build-buffer)))
 
 (defun emacsism-test ()
   "Run the current exercise test.
