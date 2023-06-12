@@ -44,6 +44,7 @@ runs an error. To install ~exercsims-cli~ got to
 https://exercism.org/cli-walkthrough
 
 Once installed and required emacsism provide this functions:
+
   - ~emacsism-url-download-and-open~: Download and open ~Readme.md~ file from
     the URL, example: ~(emacsism-url-download-and-open "URL")~ the function is
     interactive so with: ~M-x emacsism-url-download-and-open~ it asks for the URL.
@@ -53,12 +54,10 @@ Once installed and required emacsism provide this functions:
   - ~emacsism-find-exercise~: Ask for the track and exercise that already been
     downloaded and open the README.md file of exercise.
 
-  - ~emacism-test~: Also an interactive function that, when called from a file
-    inside the exercise directory, it will run the test depending
-    directory-path from that file. The results are shown in a buffer for that
-    exercise and track.
+  - ~emacsism-test~: Also an interactive function that, when called from a file
+    inside the exercise directory, it will run the exercise tests.
 
-* Container.
+* Containers.
 
 When ~emacsism-container-command~ is present, as ~"podman"~ or ~"docker"~ or
 similar but not ~nil~. The tests will run in a container named ~emacsism-track~ where the ~track~ is
@@ -66,9 +65,5 @@ the name of the exercise track. For example, in a rust exercise, a container
 ~emacsism-rust~ musts exist, and it will run the ~cargo test~ command for the
 current exercise.
 
-Simple images could be found in the ~containers~ directory. To build one of them
-use:
-
-#+begin_src sh
-  docker build ./containers/python -t emacsism-python
-#+end_src
+To build container images for a track function ~emacsism-build-container~ uses
+~emacsism-container-command~
