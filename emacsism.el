@@ -99,13 +99,11 @@
 (defun emacsism-url-download-and-open (url)
   "Download track exercise from URL."
   (interactive (list (read-string "URL: ")))
-  (let* ((url-regexp (emacsism--exercism-url-regexp))
-         (match (string-match url-regexp url)))
-    (if match
-        (let ((track (match-string 1 url))
-              (exercise (match-string 2 url)))
-          (emacsism-download-and-open track exercise))
-      (error "Not an exercism url"))))
+  (if (string-match (emacsism--exercism-url-regexp) url)
+      (let ((track (match-string 1 url))
+            (exercise (match-string 2 url)))
+        (emacsism-download-and-open track exercise))
+    (error "Not an exercism url")))
 
 (defun emacsism--exercism-url-regexp ()
   "Return a regexp that match exersicm urls."
