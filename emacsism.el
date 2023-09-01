@@ -274,6 +274,10 @@ Run the test as batch and show results in new buffer."
   "Run test file for java EXERCISE."
   (emacsism--run-command "gradle test" "java" exercise))
 
+(defun emacsism--run-jq-tests (exercise)
+  "Run test file for jq EXERCISE."
+  (emacsism--run-command (format "bats test-%s.bats" exercise) "jq" exercise))
+
 (defun emacsism--tracks-list ()
   "Hardcoded list of tracks."
   '("Bash" "C" "C#" "C++" "CFML" "Clojure" "ClojureScript" "CoffeeScript"
