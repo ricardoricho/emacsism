@@ -233,13 +233,13 @@ That is the workspace-directory with the appended track name."
 
 ;; Runners
 
-(defun emacsism--run-elixir-tests (exercise)
-  "Run test file for elixir EXERCISE."
-  (emacsism--run-command "mix test" "elixir" exercise))
-
 (defun emacsism--run-clojure-tests (exercise)
   "Run test file for clojure EXERCISE."
   (emacsism--run-command "lein test" "clojure" exercise))
+
+(defun emacsism--run-elixir-tests (exercise)
+  "Run test file for elixir EXERCISE."
+  (emacsism--run-command "mix test" "elixir" exercise))
 
 (defun emacsism--run-emacs-lisp-tests (exercise)
   "Run test file for emacs-lisp EXERCISE.
@@ -248,6 +248,20 @@ Run the test as batch and show results in new buffer."
                                 "ert-run-tests-batch-and-exit"))
          (test-command (format string-command exercise)))
     (emacsism--run-command test-command "emacs-lisp" exercise)))
+
+(defun emacsism--run-haskell-tests (exercise)
+  "Run test file for haskell EXERCISE."
+  (if emacsism-container-command
+      (error "Emacsism: Currently unsupported due stack issues")
+    (emacsism--run-command "stack test" "haskell" exercise)))
+
+(defun emacsism--run-java-tests (exercise)
+  "Run test file for java EXERCISE."
+  (emacsism--run-command "gradle test" "java" exercise))
+
+(defun emacsism--run-jq-tests (exercise)
+  "Run test file for jq EXERCISE."
+  (emacsism--run-command (format "bats test-%s.bats" exercise) "jq" exercise))
 
 (defun emacsism--run-prolog-tests (exercise)
   "Run test file for prolog EXERCISE."
@@ -269,14 +283,6 @@ Run the test as batch and show results in new buffer."
 (defun emacsism--run-rust-tests (exercise)
   "Run test file for rust EXERCISE."
   (emacsism--run-command "cargo test" "rust" exercise))
-
-(defun emacsism--run-java-tests (exercise)
-  "Run test file for java EXERCISE."
-  (emacsism--run-command "gradle test" "java" exercise))
-
-(defun emacsism--run-jq-tests (exercise)
-  "Run test file for jq EXERCISE."
-  (emacsism--run-command (format "bats test-%s.bats" exercise) "jq" exercise))
 
 (defun emacsism--tracks-list ()
   "Hardcoded list of tracks."
