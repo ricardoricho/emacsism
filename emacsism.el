@@ -111,8 +111,8 @@
 
 (defun emacsism-download (track exercise)
   "Download the `EXERCISE' from the corresponding `TRACK'."
-  (interactive (list (completing-read "Track:" (emacsism--tracks))
-                     (read-string "Exercise:")))
+  (interactive (list (completing-read "Track: " (emacsism--tracks))
+                     (read-string "Exercise: ")))
   (let* ((exercise-string (if (symbolp exercise) (symbol-name exercise)
                             exercise))
          (track-string (if (symbolp track) (symbol-name track) track))
@@ -125,8 +125,8 @@
 
 (defun emacsism-download-and-open (track exercise)
   "Download and open an EXERCISE on the given TRACK."
-  (interactive (list (completing-read "Track:" (emacsism--tracks))
-                     (read-string "Exercise:")))
+  (interactive (list (completing-read "Track: " (emacsism--tracks))
+                     (read-string "Exercise: ")))
   (progn (emacsism-download track exercise)
          (emacsism-find-exercise track exercise)))
 
@@ -274,6 +274,11 @@ Run the test as batch and show results in new buffer."
 (defun emacsism--run-python-tests (exercise)
   "Run test file for python EXERCISE."
   (emacsism--run-command "pytest" "python" exercise))
+
+(defun emacsism--run-racket-tests (exercise)
+  "Run test file for racket EXERCISE."
+  (emacsism--run-command
+   (format "raco test %s-test.rkt" exercise) "racket" exercise))
 
 (defun emacsism--run-ruby-tests (exercise)
   "Run test file for ruby EXERCISE."
