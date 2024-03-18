@@ -263,6 +263,10 @@ Run the test as batch and show results in new buffer."
   "Run test file for jq EXERCISE."
   (emacsism--run-command (format "bats test-%s.bats" exercise) "jq" exercise))
 
+(defun emacsism--run-mips-tests (exercise)
+  "Run test file for mips EXERCISE."
+  (emacsism--run-command "java -jar /mars.jar nc runner.mips impl.mips" "mips" exercise))
+
 (defun emacsism--run-prolog-tests (exercise)
   "Run test file for prolog EXERCISE."
   (let* ((exercise-name (replace-regexp-in-string "-" "_" exercise))
