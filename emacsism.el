@@ -237,6 +237,14 @@ That is the workspace-directory with the appended track name."
   "Run test file for clojure EXERCISE."
   (emacsism--run-command "lein test" "clojure" exercise))
 
+(defun emacsism--run-common-lisp-tests (exercise)
+  "Run test suite for common-lisp EXERCISE."
+  (let* ((test-file (format "%s-test.lisp" exercise))
+         (quit-clause (format "'(uiop:quit (if (%s-test:run-tests) 0 1))'" exercise))
+         (test-command (format "ros run --load %s --eval %s"
+                              test-file quit-clause)))
+    (emacsism--run-command test-command "common-lisp" exercise)))
+
 (defun emacsism--run-elixir-tests (exercise)
   "Run test file for elixir EXERCISE."
   (emacsism--run-command "mix test" "elixir" exercise))
