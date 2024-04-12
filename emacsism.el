@@ -156,18 +156,16 @@
 (defun emacsism--exercise-name (track file)
   "Get TRACK exercise name from FILE path."
   (let* ((directory (expand-file-name file))
-         (track-match (string-match track directory))
-         (exercise-path (substring directory (+ 1 track-match (length track))))
+         (track-match (string-match (format "/%s/" track) directory))
+         (exercise-path (substring directory (+ 2 track-match (length track))))
          (rest-match (string-match "/" exercise-path)))
     (substring exercise-path 0 rest-match)))
 
 (defun emacsism--track-name (file)
   "Get track from FILE."
-  (message "File is %s" file)
   (let* ((workspace (emacsism-workspace))
          (track-rest (substring file (+ 1 (length workspace))))
          (exercise-rest (string-match "/" track-rest)))
-    (message "track-rest:: %s" track-rest)
     (substring track-rest 0 exercise-rest)))
 
 (defun emacsism-build-container (track)
@@ -291,6 +289,10 @@ Run the test as batch and show results in new buffer."
   "Run test file for racket EXERCISE."
   (emacsism--run-command
    (format "raco test %s-test.rkt" exercise) "racket" exercise))
+
+(defun emacsism--run-r-tests (exercise)
+  "Run test file for R EXERCISE."
+  (emacsism--run-command (format "Rscript test_%s.R" exercise) "r" exercise))
 
 (defun emacsism--run-ruby-tests (exercise)
   "Run test file for ruby EXERCISE."
