@@ -27,6 +27,7 @@
     (define-key map (kbd "f") #'emacsism-find-exercise)
     (define-key map (kbd "s") #'emacsism-submit)
     (define-key map (kbd "t") #'emacsism-test)
+    (define-key map (kbd "v") #'emacsism-visit-exercise)
     map)
   "Emacsism prefix keymap.")
 
@@ -105,9 +106,13 @@
         (emacsism-download-and-open track exercise))
     (error "Not an exercism url")))
 
+(defun emacsism--build-exercism-url (track exercise)
+  "Build the exercism url for TRACK and EXERCISE."
+  (format "https://exercism.org/tracks/%s/exercises/%s" track exercise))
+
 (defun emacsism--exercism-url-regexp ()
   "Return a regexp that match exersicm urls."
-  "https://exercism.org/tracks/\\(.+\\)/exercises/\\(.+\\)")
+  (emacsism--build-exercism-url "\\(.+\\)" "\\(.+\\)"))
 
 (defun emacsism-download (track exercise)
   "Download the `EXERCISE' from the corresponding `TRACK'."
@@ -137,6 +142,17 @@
          (submit-command (concat "exercism submit " file-to-submit)))
     (message submit-command)
     (shell-command submit-command)))
+
+
+(defun emacsism-visit-exercise ()
+  "Build the url to visit the exercise in the browser."
+  (interactive)
+  (let* ((current-file (expand-file-name (buffer-file-name)))
+         (track (emacsism--track-name current-file))
+         (exercise (emacsism--exercise-name track current-file))
+         (url (emacsism--build-exercism-url track exercise)))
+    (browse-url url)
+    (message "Visit %s" url)))
 
 (defun emacsism--container-attributes (track exercise)
   "Command to run TRACK container with attributes for EXERCISE."
