@@ -26,7 +26,7 @@
     (define-key map (kbd "d") #'emacsism-url-download-and-open)
     (define-key map (kbd "f") #'emacsism-find-exercise)
     (define-key map (kbd "s") #'emacsism-submit)
-    (define-key map (kbd "t") #'emacsism-test)
+    (define-key map (kbd "t") #'emacsism-run-tests)
     (define-key map (kbd "v") #'emacsism-visit-exercise)
     map)
   "Emacsism prefix keymap.")
@@ -203,7 +203,7 @@
                        container-path)
         (switch-to-buffer build-buffer)))
 
-(defun emacsism-test ()
+(defun emacsism-run-tests ()
   "Run the current exercise test.
 According to current buffer file, found the track and exercise.
 Then for the track found run `emacissm--run-track-tests' with exercise."
@@ -280,6 +280,10 @@ Run the test as batch and show results in new buffer."
 (defun emacsism--run-java-tests (exercise)
   "Run test file for java EXERCISE."
   (emacsism--run-command "gradle test" "java" exercise))
+
+(defun emacsism--run-javascript-tests (exercise)
+  "Run test file for javascript EXERCISE."
+  (emacsism--run-command "yarn test" "javascript" exercise))
 
 (defun emacsism--run-jq-tests (exercise)
   "Run test file for jq EXERCISE."
