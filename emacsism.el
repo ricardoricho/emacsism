@@ -283,7 +283,7 @@ Run the test as batch and show results in new buffer."
 
 (defun emacsism--run-javascript-tests (exercise)
   "Run test file for javascript EXERCISE."
-  (emacsism--run-command "yarn test" "javascript" exercise))
+  (emacsism--run-command "yarn install && yarn test" "javascript" exercise))
 
 (defun emacsism--run-jq-tests (exercise)
   "Run test file for jq EXERCISE."
