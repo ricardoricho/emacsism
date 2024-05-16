@@ -273,9 +273,7 @@ Run the test as batch and show results in new buffer."
 
 (defun emacsism--run-haskell-tests (exercise)
   "Run test file for haskell EXERCISE."
-  (if emacsism-container-command
-      (error "Emacsism: Currently unsupported due stack issues")
-    (emacsism--run-command "stack test" "haskell" exercise)))
+  (emacsism--run-command "stack test" "haskell" exercise))
 
 (defun emacsism--run-java-tests (exercise)
   "Run test file for java EXERCISE."
