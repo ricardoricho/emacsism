@@ -184,25 +184,6 @@
          (exercise-rest (string-match "/" track-rest)))
     (substring track-rest 0 exercise-rest)))
 
-(defun emacsism-build-container (track)
-  "Build emacsism TRACK container to running exercise test."
-  (interactive (list (completing-read "Track: " (emacsism--tracks))))
-  (when (null emacsism-container-command)
-    (error "Variable `emacsism-container-command' is nil"))
-  (let ((default-directory (emacsism--library-dir))
-        (container-name (emacsism--container-name track))
-        (build-buffer
-         (get-buffer-create (format "*emacsism--container-build-%s*" track)))
-        (build-command-name (format "build-%s" track))
-        (container-path (expand-file-name (format "containers/%s" track))))
-        (message "Build: %s build -t %s %s" emacsism-container-command
-                 container-name container-path)
-        (start-process build-command-name build-buffer
-                       emacsism-container-command
-                       "build" "-t" container-name
-                       container-path)
-        (switch-to-buffer build-buffer)))
-
 (defun emacsism-run-tests ()
   "Run the current exercise test.
 According to current buffer file, found the track and exercise.
