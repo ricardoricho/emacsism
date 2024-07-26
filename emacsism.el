@@ -214,7 +214,16 @@ Then for the track found run `emacissm--run-track-tests' with exercise."
           (emacsism--exercise-slug current-track current-file))
          (test-command
           (intern (concat "emacsism--run-" current-track "-tests"))))
-    (funcall test-command current-exercise)))
+    (funcall 'emacsism-test-runner current-track current-exercise)))
+
+(defun emacsism-test-runner (track exercise)
+  "Call TRACK test runner for EXERCISE."
+  (let* ((volume (format "%s:/solution" (emacsism--exercise-path track exercise)))
+         (test-command (format "docker run --rm -v %s exercism/%s-test-runner %s /solution /solution"
+                               volume track exercise)))
+    (message "Emacsism test: %s" test-command)
+    (shell-command test-command)
+    (find-file "results.json")))
 
 (defun emacsism--run-command (command track exercise)
   "Call COMMAND and show results in a TRACK EXERCISE buffer.
