@@ -211,38 +211,43 @@ Then for the track found run `emacissm--run-track-tests' with exercise."
   (let* ((current-file (expand-file-name (buffer-file-name)))
          (current-track (emacsism--track-name current-file))
          (current-exercise
-          (emacsism--exercise-slug current-track current-file))
-         (test-command
-          (intern (concat "emacsism--run-" current-track "-tests"))))
+          (emacsism--exercise-slug current-track current-file)))
     (funcall 'emacsism-test-runner current-track current-exercise)))
 
 (defun emacsism-test-runner (track exercise)
   "Call TRACK test runner for EXERCISE."
-  (let* ((volume (format "%s:/solution" (emacsism--exercise-path track exercise)))
+  (if emacsism-container-command
+      (emacsism-container-test-runner track exercise)
+    (emacsism-local-test-runner track exercise)))
+
+(defun emacsism-local-test-runner (track exercise)
+  "Run EXERCISE test file with local tools for TRACK."
+  (let ((test-command (intern (format "emacsism--run-%s-tests" track))))
+    (funcall test-command exercise)))
+
+(defun emacsism-container-test-runner (track exercise)
+  "Call TRACK test runner container for EXERCISE."
+  (let* ((exercise-path (emacsism--exercise-path track exercise))
+         (volume (format "%s:/solution" exercise-path))
          (test-command (format "docker run --rm -v %s exercism/%s-test-runner %s /solution /solution"
                                volume track exercise)))
     (message "Emacsism test: %s" test-command)
     (shell-command test-command)
-    (find-file "results.json")))
+    (find-file-other-window (expand-file-name "results.json" exercise-path))))
 
 (defun emacsism--run-command (command track exercise)
   "Call COMMAND and show results in a TRACK EXERCISE buffer.
 Execute COMMAND (general for testing) with the EXERCISE path as
 `default-directory'.  The new buffer named *emacsism-TRACK-EXERCISE*
 run with `compilation-mode' for results."
-  (let* ((test-buffer
-          (get-buffer-create (concat "*emacsism-" track "-" exercise "*")))
-         (default-directory (emacsism--exercise-path track exercise))
-         (container-prefix (emacsism--container-attributes track exercise))
-         (execute-command (concat container-prefix
-                                  (if container-prefix
-                                      (format "\"%s\"" command)
-                                    command))))
-    (message "Emacsism: %s" execute-command)
+  (let* ((test-buffer-name (format "*emacsism-%s-%s*" track exercise))
+         (test-buffer (get-buffer-create test-buffer-name))
+         (default-directory (emacsism--exercise-path track exercise)))
+    (message "Emacsism: %s" command)
     (with-current-buffer test-buffer
       (setq buffer-read-only nil)
       (erase-buffer)
-      (async-shell-command execute-command test-buffer))))
+      (async-shell-command command test-buffer))))
 
 (defun emacsism--track-path (track)
   "Return the path of the TRACK.
