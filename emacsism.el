@@ -149,7 +149,7 @@
   (interactive)
   (let* ((current-file (expand-file-name (buffer-file-name)))
          (track (emacsism--track-name current-file))
-         (exercise (emacsism--exercise-name track current-file))
+         (exercise (emacsism--exercise-slug track current-file))
          (url (emacsism--build-exercism-url track exercise)))
     (browse-url url)
     (message "Visit %s" url)))
@@ -163,13 +163,13 @@
 
 (defun emacsism--container-run-options (track exercise)
   "Format options to run TRACK EXERCISE."
-  (format "-v %s:/%s" (emacsism--exercise-path track exercise) track))
+  (format "--rm -v %s:/%s" (emacsism--exercise-path track exercise) track))
 
 (defun emacsism--container-name (track)
   "Emacsism container name for TRACK."
-  (concat "emacsism-" track))
+  (format "%s-test-runner" track))
 
-(defun emacsism--exercise-name (track file)
+(defun emacsism--exercise-slug (track file)
   "Get TRACK exercise name from FILE path."
   (let* ((directory (expand-file-name file))
          (track-match (string-match (format "/%s/" track) directory))
@@ -211,7 +211,7 @@ Then for the track found run `emacissm--run-track-tests' with exercise."
   (let* ((current-file (expand-file-name (buffer-file-name)))
          (current-track (emacsism--track-name current-file))
          (current-exercise
-          (emacsism--exercise-name current-track current-file))
+          (emacsism--exercise-slug current-track current-file))
          (test-command
           (intern (concat "emacsism--run-" current-track "-tests"))))
     (funcall test-command current-exercise)))
@@ -242,8 +242,8 @@ That is the workspace-directory with the appended track name."
 
 (defun emacsism--exercise-path (track exercise)
   "Return the EXERCISE path found in TRACK."
-  (let ((exercise-name (emacsism--exercise-name track exercise)))
-    (expand-file-name exercise-name (emacsism--track-path track))))
+  (let ((exercise-slug (emacsism--exercise-slug track exercise)))
+    (expand-file-name exercise-slug (emacsism--track-path track))))
 
 ;; Runners
 
@@ -293,10 +293,10 @@ Run the test as batch and show results in new buffer."
 
 (defun emacsism--run-prolog-tests (exercise)
   "Run test file for prolog EXERCISE."
-  (let* ((exercise-name (replace-regexp-in-string "-" "_" exercise))
+  (let* ((exercise-slug (replace-regexp-in-string "-" "_" exercise))
          (string-command (concat "swipl -f %s.pl -s %s_tests.plt "
                                  "-g run_tests,halt -t 'halt(1)'"))
-         (test-command (format string-command exercise-name exercise-name)))
+         (test-command (format string-command exercise-slug exercise-slug)))
     (emacsism--run-command test-command "prolog" exercise)))
 
 (defun emacsism--run-python-tests (exercise)
@@ -314,8 +314,8 @@ Run the test as batch and show results in new buffer."
 
 (defun emacsism--run-ruby-tests (exercise)
   "Run test file for ruby EXERCISE."
-  (let ((exercise-name (replace-regexp-in-string "-" "_" exercise)))
-    (emacsism--run-command (format "ruby %s_test.rb" exercise-name) "ruby" exercise-name)))
+  (let ((exercise-slug (replace-regexp-in-string "-" "_" exercise)))
+    (emacsism--run-command (format "ruby %s_test.rb" exercise-slug) "ruby" exercise-slug)))
 
 (defun emacsism--run-rust-tests (exercise)
   "Run test file for rust EXERCISE."
