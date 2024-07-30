@@ -4,6 +4,8 @@
 ;;; https://github.com/exercism/cli
 ;;; Code:
 
+(require 'ansi-color)
+(require 'json)
 (require 'subr-x)
 
 (defgroup emacsism nil
@@ -143,7 +145,6 @@
     (message submit-command)
     (shell-command submit-command)))
 
-
 (defun emacsism-visit-exercise ()
   "Build the url to visit the exercise in the browser."
   (interactive)
@@ -153,21 +154,6 @@
          (url (emacsism--build-exercism-url track exercise)))
     (browse-url url)
     (message "Visit %s" url)))
-
-(defun emacsism--container-attributes (track exercise)
-  "Command to run TRACK container with attributes for EXERCISE."
-  (when emacsism-container-command
-    (concat emacsism-container-command " run "
-            (emacsism--container-run-options track exercise) " "
-            (emacsism--container-name track) " ")))
-
-(defun emacsism--container-run-options (track exercise)
-  "Format options to run TRACK EXERCISE."
-  (format "--rm -v %s:/%s" (emacsism--exercise-path track exercise) track))
-
-(defun emacsism--container-name (track)
-  "Emacsism container name for TRACK."
-  (format "%s-test-runner" track))
 
 (defun emacsism--exercise-slug (track file)
   "Get TRACK exercise name from FILE path."
@@ -206,15 +192,62 @@ Then for the track found run `emacissm--run-track-tests' with exercise."
   (let ((test-command (intern (format "emacsism--run-%s-tests" track))))
     (funcall test-command exercise)))
 
+(defun emacsism-container--test-command (track exercise &optional path)
+  "Build the command to test EXERCISE on TRACK mounting PATH."
+  (let* ((exercise-path (or path default-directory))
+         (runner (format "exercism/%s-test-runner" track))
+         (volume (format "%s:/solution" exercise-path)))
+    (format "%s run --rm -v %s %s %s /solution /solution"
+            emacsism-container-command volume runner exercise)))
+
 (defun emacsism-container-test-runner (track exercise)
   "Call TRACK test runner container for EXERCISE."
-  (let* ((exercise-path (emacsism--exercise-path track exercise))
-         (volume (format "%s:/solution" exercise-path))
-         (test-command (format "docker run --rm -v %s exercism/%s-test-runner %s /solution /solution"
-                               volume track exercise)))
-    (message "Emacsism test: %s" test-command)
-    (shell-command test-command)
-    (find-file-other-window (expand-file-name "results.json" exercise-path))))
+  (let* ((default-directory (emacsism--exercise-path track exercise))
+         (test-command (emacsism-container--test-command track exercise))
+         (test-buffer-name (format "*emacsism-%s-%s*" track exercise))
+         (results-file (expand-file-name "results.json")))
+    (with-current-buffer (get-buffer-create test-buffer-name)
+      (switch-to-buffer-other-window (current-buffer))
+      (setq buffer-read-only nil)
+      (erase-buffer)
+      (insert (format "Exercism command: %s\n" test-command))
+      (shell-command test-command)
+      (insert (format "Exercism results: %s\n  Found in: %s\n"
+                      (file-exists-p results-file) results-file))
+      (when (file-exists-p results-file)
+        (let ((results (json-parse-string
+                        (with-temp-buffer
+                          (insert-file-contents results-file)
+                          (buffer-string)))))
+          (delete-file results-file)
+          (insert "Results...\n"
+                  (format "Hash keys: %s\n\n" (hash-table-keys results))
+                  (format " Status: %s\n" (gethash "status" results))
+                  (format "version: %s\n" (gethash "version" results))
+                  (format "message: %s\n" (gethash "message" results))
+                  "Tests:\n")
+          (emacsism--results-insert-tests (gethash "tests" results))))
+      (compilation-mode))))
+
+(defun emacsism--results-insert-tests (results)
+  "Insert the RESULTS in buffer."
+  (mapc 'emacsism--results-insert-test results))
+
+(defun emacsism--results-insert-test (test)
+  "Insert the TEST in buffer."
+  (let ((keys (hash-table-keys test))
+        (name (gethash "name" test))
+        (status (gethash "status" test))
+        (test-code (gethash "test_code" test))
+        (test-message (gethash "message" test)))
+    (insert
+     (format "       Name: %s\n" name)
+     (format "  test-code: %s\n" test-code)
+     (format "     status: %s\n" status)
+     (if (and test-message (not (eq test-message :null)))
+         (format "    message: %s\n\n"
+                 (string-replace "\n" "\n  " (ansi-color-apply test-message)))
+       "\n"))))
 
 (defun emacsism--run-command (command track exercise)
   "Call COMMAND and show results in a TRACK EXERCISE buffer.
@@ -224,10 +257,10 @@ run with `compilation-mode' for results."
   (let* ((test-buffer-name (format "*emacsism-%s-%s*" track exercise))
          (test-buffer (get-buffer-create test-buffer-name))
          (default-directory (emacsism--exercise-path track exercise)))
-    (message "Emacsism: %s" command)
     (with-current-buffer test-buffer
       (setq buffer-read-only nil)
       (erase-buffer)
+      (insert "Emacsism: %s" command)
       (async-shell-command command test-buffer))))
 
 (defun emacsism--track-path (track)
