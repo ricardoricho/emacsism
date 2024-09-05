@@ -2,7 +2,7 @@
 
 [[https://www.gnu.org/software/emacs/][Emacs]] + [[https://excersim.org][Excersim]]
 
-A wrapper for exercism [[https://exercism.org/cli-walkthrough][CLI]].
+A wrapper for exercism [[https://exercism.org/cli-walkthrough][CLI]] and runners.
 
 * Installation
 
@@ -57,13 +57,10 @@ Once installed and required emacsism provide this functions:
   - ~emacsism-test~: Also an interactive function that, when called from a file
     inside the exercise directory, it will run the exercise tests.
 
-* Containers.
+* Runners.
 
 When ~emacsism-container-command~ is present, as ~"podman"~ or ~"docker"~ or
-similar but not ~nil~. The tests will run in a container named ~emacsism-track~ where the ~track~ is
-the name of the exercise track. For example, in a rust exercise, a container
-~emacsism-rust~ musts exist, and it will run the ~cargo test~ command for the
-current exercise.
-
-To build container images for a track function ~emacsism-build-container~ uses
-~emacsism-container-command~
+similar but not ~nil~. The tests will run ussing the "exercism track
+runner". For example, in a rust exercise, the runner is
+~exercism/rust-test-runner~, and it will run the test, set the results in a
+~json~ file and open the parsed result in a new buffer.

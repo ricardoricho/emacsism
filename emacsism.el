@@ -215,19 +215,24 @@ Then for the track found run `emacissm--run-track-tests' with exercise."
       (insert (format "Exercism results: %s\n  Found in: %s\n"
                       (file-exists-p results-file) results-file))
       (when (file-exists-p results-file)
-        (let ((results (json-parse-string
-                        (with-temp-buffer
-                          (insert-file-contents results-file)
-                          (buffer-string)))))
+        (let ((results (emacsism--results-parse-json results-file)))
           (delete-file results-file)
-          (insert "Results...\n"
-                  (format "Hash keys: %s\n\n" (hash-table-keys results))
+          (insert "Results.\n"
+                  (format "Version: %s\n" (gethash "version" results))
                   (format " Status: %s\n" (gethash "status" results))
-                  (format "version: %s\n" (gethash "version" results))
-                  (format "message: %s\n" (gethash "message" results))
+                  (format "Message: %s\n" (gethash "message" results))
                   "Tests:\n")
           (emacsism--results-insert-tests (gethash "tests" results))))
       (compilation-mode))))
+
+(defun emacsism--results-parse-json (json-file)
+  "Parse JSON-FILE that containg results or visit the file when error occurs."
+  (condition-case var-with-error
+      (json-parse-string
+       (with-temp-buffer
+         (insert-file-contents json-file)
+         (buffer-string)))
+    (json-parse-error (find-file-other-window json-file))))
 
 (defun emacsism--results-insert-tests (results)
   "Insert the RESULTS in buffer."
