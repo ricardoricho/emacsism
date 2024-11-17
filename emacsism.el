@@ -179,7 +179,7 @@ Then for the track found run `emacissm--run-track-tests' with exercise."
          (current-track (emacsism--track-name current-file))
          (current-exercise
           (emacsism--exercise-slug current-track current-file)))
-    (funcall 'emacsism-test-runner current-track current-exercise)))
+    (emacsism-test-runner current-track current-exercise)))
 
 (defun emacsism-test-runner (track exercise)
   "Call TRACK test runner for EXERCISE."
@@ -189,8 +189,8 @@ Then for the track found run `emacissm--run-track-tests' with exercise."
 
 (defun emacsism-local-test-runner (track exercise)
   "Run EXERCISE test file with local tools for TRACK."
-  (let ((test-command (intern (format "emacsism--run-%s-tests" track))))
-    (funcall test-command exercise)))
+  (let ((test-command "exercism test"))
+    (emacsism--run-command test-command track exercise)))
 
 (defun emacsism-container--test-command (track exercise &optional path)
   "Build the command to test EXERCISE on TRACK mounting PATH."
@@ -223,6 +223,7 @@ Then for the track found run `emacissm--run-track-tests' with exercise."
                   (format "Message: %s\n" (gethash "message" results))
                   "Tests:\n")
           (emacsism--results-insert-tests (gethash "tests" results))))
+      (goto-char (point-min))
       (compilation-mode))))
 
 (defun emacsism--results-parse-json (json-file)
@@ -277,82 +278,6 @@ That is the workspace-directory with the appended track name."
   "Return the EXERCISE path found in TRACK."
   (let ((exercise-slug (emacsism--exercise-slug track exercise)))
     (expand-file-name exercise-slug (emacsism--track-path track))))
-
-;; Runners
-
-(defun emacsism--run-clojure-tests (exercise)
-  "Run test file for clojure EXERCISE."
-  (emacsism--run-command "lein test" "clojure" exercise))
-
-(defun emacsism--run-common-lisp-tests (exercise)
-  "Run test suite for common-lisp EXERCISE."
-  (let* ((test-file (format "%s-test.lisp" exercise))
-         (quit-clause (format "'(uiop:quit (if (%s-test:run-tests) 0 1))'" exercise))
-         (test-command (format "ros run --load %s --eval %s"
-                              test-file quit-clause)))
-    (emacsism--run-command test-command "common-lisp" exercise)))
-
-(defun emacsism--run-elixir-tests (exercise)
-  "Run test file for elixir EXERCISE."
-  (emacsism--run-command "mix test" "elixir" exercise))
-
-(defun emacsism--run-emacs-lisp-tests (exercise)
-  "Run test file for emacs-lisp EXERCISE.
-Run the test as batch and show results in new buffer."
-  (let* ((string-command (concat "emacs -batch -l ert -l %s-test.el -f "
-                                "ert-run-tests-batch-and-exit"))
-         (test-command (format string-command exercise)))
-    (emacsism--run-command test-command "emacs-lisp" exercise)))
-
-(defun emacsism--run-haskell-tests (exercise)
-  "Run test file for haskell EXERCISE."
-  (emacsism--run-command "stack test" "haskell" exercise))
-
-(defun emacsism--run-java-tests (exercise)
-  "Run test file for java EXERCISE."
-  (emacsism--run-command "gradle test" "java" exercise))
-
-(defun emacsism--run-javascript-tests (exercise)
-  "Run test file for javascript EXERCISE."
-  (emacsism--run-command "yarn install && yarn test" "javascript" exercise))
-
-(defun emacsism--run-jq-tests (exercise)
-  "Run test file for jq EXERCISE."
-  (emacsism--run-command (format "bats test-%s.bats" exercise) "jq" exercise))
-
-(defun emacsism--run-mips-tests (exercise)
-  "Run test file for mips EXERCISE."
-  (emacsism--run-command "java -jar /mars.jar nc runner.mips impl.mips" "mips" exercise))
-
-(defun emacsism--run-prolog-tests (exercise)
-  "Run test file for prolog EXERCISE."
-  (let* ((exercise-slug (replace-regexp-in-string "-" "_" exercise))
-         (string-command (concat "swipl -f %s.pl -s %s_tests.plt "
-                                 "-g run_tests,halt -t 'halt(1)'"))
-         (test-command (format string-command exercise-slug exercise-slug)))
-    (emacsism--run-command test-command "prolog" exercise)))
-
-(defun emacsism--run-python-tests (exercise)
-  "Run test file for python EXERCISE."
-  (emacsism--run-command "pytest" "python" exercise))
-
-(defun emacsism--run-racket-tests (exercise)
-  "Run test file for racket EXERCISE."
-  (emacsism--run-command
-   (format "raco test %s-test.rkt" exercise) "racket" exercise))
-
-(defun emacsism--run-r-tests (exercise)
-  "Run test file for R EXERCISE."
-  (emacsism--run-command (format "Rscript test_%s.R" exercise) "r" exercise))
-
-(defun emacsism--run-ruby-tests (exercise)
-  "Run test file for ruby EXERCISE."
-  (let ((exercise-slug (replace-regexp-in-string "-" "_" exercise)))
-    (emacsism--run-command (format "ruby %s_test.rb" exercise-slug) "ruby" exercise-slug)))
-
-(defun emacsism--run-rust-tests (exercise)
-  "Run test file for rust EXERCISE."
-  (emacsism--run-command "cargo test" "rust" exercise))
 
 (defun emacsism--tracks-list ()
   "Hardcoded list of tracks."
