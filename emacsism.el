@@ -200,6 +200,17 @@ Then for the track found run `emacissm--run-track-tests' with exercise."
     (format "%s run --rm -v %s %s %s /solution /solution"
             emacsism-container-command volume runner exercise)))
 
+(defun emacsism-container-pull-test-runner (track)
+  "Pull TRACK test-runner container."
+  (interactive (list (completing-read "Track: " (emacsism--tracks))))
+  (let* ((track-container (format "exercism/%s-test-runner" track))
+         (track-buffer-name (format "*emacsism-pull-%s-test-runner*" track))
+         (track-buffer (get-buffer-create track-buffer-name))
+         (command (format "%s pull %s" emacsism-container-command
+                          track-container)))
+    (switch-to-buffer-other-window track-buffer-name)
+    (async-shell-command command track-buffer)))
+
 (defun emacsism-container-test-runner (track exercise)
   "Call TRACK test runner container for EXERCISE."
   (let* ((default-directory (emacsism--exercise-path track exercise))
