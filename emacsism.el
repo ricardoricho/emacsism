@@ -7,6 +7,7 @@
 (require 'ansi-color)
 (require 'json)
 (require 'subr-x)
+(require 'markdown-mode)
 
 (defgroup emacsism nil
   "Group for emacsism."
@@ -83,10 +84,14 @@
   "Open `find-file' in readme file of the EXERCISE in TRACK directory."
   (interactive (list (completing-read "Track: " (emacsism--tracks))))
   (let ((workspace (emacsism-workspace))
-        (exercise (or exercise (completing-read "Exercise:" (emacsism--exercises track)))))
+        (exercise (or exercise
+                      (completing-read "Exercise:"
+                                       (emacsism--exercises track)))))
     (find-file
-     (expand-file-name "README.md" (mapconcat 'file-name-as-directory
-                                              (list workspace track exercise) nil)))))
+     (expand-file-name "README.md"
+                       (mapconcat 'file-name-as-directory
+                                  (list workspace track exercise) nil)))
+    (markdown-view-mode)))
 
 (defun emacsism-url-download (url)
   "Download track exercise from URL."
