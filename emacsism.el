@@ -1,4 +1,4 @@
-;;; emacsism --- Wrapper for exercism cli
+;;; emacsism --- Wrapper for exercism cli  -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;;; Define elisp functions with `shell-command' to use exercism cli.
 ;;; https://github.com/exercism/cli
@@ -30,7 +30,7 @@
     (define-key map (kbd "f") #'emacsism-find-exercise)
     (define-key map (kbd "s") #'emacsism-submit)
     (define-key map (kbd "t") #'emacsism-run-tests)
-    (define-key map (kbd "u") #'emacsism-update-and-open)
+    (define-key map (kbd "u") #'emacsism-url-update-and-open)
     (define-key map (kbd "v") #'emacsism-visit-exercise)
     map)
   "Emacsism prefix keymap.")
@@ -86,7 +86,7 @@
   (interactive (list (completing-read "Track: " (emacsism--tracks))))
   (let ((workspace (emacsism-workspace))
         (exercise (or exercise
-                      (completing-read "Exercise:"
+                      (completing-read "Exercise: "
                                        (emacsism--exercises track)))))
     (find-file
      (expand-file-name "README.md"
@@ -116,7 +116,7 @@
 
 (defun emacsism-url-update-and-open (url)
   "Download new version of exercise from URL and open it."
-    (interactive (list (read-string "URL: ")))
+  (interactive (list (read-string "URL: ")))
   (if (string-match (emacsism--exercism-url-regexp) url)
       (let ((track (match-string 1 url))
             (exercise (match-string 2 url)))
@@ -132,16 +132,17 @@
   (emacsism--build-exercism-url "\\(.+\\)" "\\(.+\\)"))
 
 (defun emacsism-download (track exercise &optional force)
-  "Download the EXERCISE from the corresponding TRACK.  Support FORCE for update."
+  "Download the EXERCISE from the corresponding TRACK.
+Support optional FORCE for update when is not nil."
   (interactive (list (completing-read "Track: " (emacsism--tracks))
                      (read-string "Exercise: ")))
   (let* ((exercise-string (if (symbolp exercise) (symbol-name exercise)
                             exercise))
          (track-string (if (symbolp track) (symbol-name track) track))
-         (download-force (if force "--force" ""))
+         (force-download (if force "--force" ""))
          (download-command
           (format "exercism download %s --track=%s --exercise=%s"
-                  download-force track-string exercise-string)))
+                  force-download track-string exercise-string)))
     (message download-command)
     (shell-command download-command)))
 
@@ -154,10 +155,13 @@
 
 (defun emacsism-update-and-open (track exercise)
   "Update (force download) EXERCISE TRACK and open it."
-    (interactive (list (completing-read "Track: " (emacsism--tracks))
-                     (read-string "Exercise: ")))
-  (progn (emacsism-download track exercise 'force)
-         (emacsism-find-exercise track exercise)))
+  (interactive (list (completing-read "Track: " (emacsism--tracks))))
+  (let ((workspace (emacsism-workspace))
+        (exercise (or exercise
+                      (completing-read "Exercise: "
+                                       (emacsism--exercises track)))))
+    (progn (emacsism-download track exercise 'force)
+           (emacsism-find-exercise track exercise))))
 
 (defun emacsism-submit (&optional file)
   "Submit the solution `FILE' if any, other submit the current buffer `FILE'."
