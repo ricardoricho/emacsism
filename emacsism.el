@@ -241,14 +241,28 @@ Then for the track found run `emacissm--run-track-tests' with exercise."
   "Call TRACK test runner container for EXERCISE."
   (let* ((default-directory (emacsism--exercise-path track exercise))
          (test-command (emacsism-container--test-command track exercise))
-         (test-buffer-name (format "*emacsism-%s-%s*" track exercise))
-         (results-file (expand-file-name "results.json")))
+         (test-buffer-name (format "*emacsism-%s-%s*" track exercise)))
     (with-current-buffer (get-buffer-create test-buffer-name)
       (switch-to-buffer-other-window (current-buffer))
       (setq buffer-read-only nil)
       (erase-buffer)
       (insert (format "Exercism command: %s\n" test-command))
-      (shell-command test-command)
+      (set-process-sentinel
+       (start-process-shell-command
+        test-buffer-name (current-buffer) test-command)
+       'emacsism--test-runner-sentinel))))
+
+(defun emacsism--test-runner-sentinel (test-runner event)
+  "Sentinel for TEST-RUNNER.  Show results when EVENT is finished."
+  (pcase event
+    ("finished\n" (emacsism--show-results test-runner))
+    (_ (with-current-buffer (process-buffer test-runner)
+         (insert "Sentinel received %s %s" test-runner event)))))
+
+(defun emacsism--show-results (result-buffer)
+  "Show results in RESULT-BUFFER."
+  (with-current-buffer (process-buffer result-buffer)
+    (let ((results-file (expand-file-name "results.json")))
       (insert (format "Exercism results: %s\n  Found in: %s\n"
                       (file-exists-p results-file) results-file))
       (when (file-exists-p results-file)
