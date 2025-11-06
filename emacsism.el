@@ -201,7 +201,8 @@ Support optional FORCE for update when is not nil."
 According to current buffer file, found the track and exercise.
 Then for the track found run `emacissm--run-track-tests' with exercise."
   (interactive)
-  (let* ((current-file (expand-file-name (buffer-file-name)))
+  (let* ((current-file
+          (expand-file-name (or (buffer-file-name) default-directory)))
          (current-track (emacsism--track-name current-file))
          (current-exercise
           (emacsism--exercise-slug current-track current-file)))
