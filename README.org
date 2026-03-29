@@ -1,6 +1,6 @@
 #+TITLE: Emacsism
 
-[[https://www.gnu.org/software/emacs/][Emacs]] + [[https://excersim.org][Excersim]]
+[[https://www.gnu.org/software/emacs/][Emacs]] + [[https://exercism.org][Excersim]]
 
 A wrapper for exercism [[https://exercism.org/cli-walkthrough][CLI]] and runners.
 
