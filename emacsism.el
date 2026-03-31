@@ -21,7 +21,16 @@
 (defcustom emacsism-container-command nil
   "Container commad, for example: docker, podman, etc."
   :group 'emacsism
-  :type 'string)
+  :type '(choice (const :tag "None" nil)
+                 (string :tag "Docker" "docker")
+                 (string :tag "Podman" "podman")
+                 (string :tag "Other")))
+
+(defcustom emacsism-exercise-filename nil
+  "Local buffer variable to overwrite exercise file name."
+  :group 'emacsism
+  :type 'string
+  :local t)
 
 ;;;###autoload;
 (defvar emacsism-command-map
@@ -32,6 +41,7 @@
     (define-key map (kbd "t") #'emacsism-run-tests)
     (define-key map (kbd "u") #'emacsism-url-update-and-open)
     (define-key map (kbd "v") #'emacsism-visit-exercise)
+    (define-key map (kbd "#") #'emacsism-set-exercise-filename)
     map)
   "Emacsism prefix keymap.")
 
@@ -93,6 +103,12 @@
                        (mapconcat 'file-name-as-directory
                                   (list workspace track exercise) nil)))
     (markdown-view-mode)))
+
+(defun emacsism-set-exercise-filename (file)
+  "Set local `emacsism-exercise-filename' to FILE."
+  (interactive (list (read-file-name "File: ")))
+  (let ((filename (file-name-base file)))
+    (setq-local emacsism-exercise-filename filename)))
 
 (defun emacsism-url-download (url)
   "Download track exercise from URL."
@@ -241,7 +257,8 @@ Then for the track found run `emacissm--run-track-tests' with exercise."
 (defun emacsism-container-test-runner (track exercise)
   "Call TRACK test runner container for EXERCISE."
   (let* ((default-directory (emacsism--exercise-path track exercise))
-         (test-command (emacsism-container--test-command track exercise))
+         (exercise-filename (or emacsism-exercise-filename exercise))
+         (test-command (emacsism-container--test-command track exercise-filename))
          (test-buffer-name (format "*emacsism-%s-%s*" track exercise)))
     (with-current-buffer (get-buffer-create test-buffer-name)
       (switch-to-buffer-other-window (current-buffer))

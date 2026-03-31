@@ -64,3 +64,10 @@ similar but not ~nil~. The tests will run ussing the "exercism track
 runner". For example, in a rust exercise, the runner is
 ~exercism/rust-test-runner~, and it will run the test, set the results in a
 ~json~ file and open the parsed result in a new buffer.
+
+** Troubleshooting
+
+In Python track, in most of the exercises, the filename doesn't match the
+exercise name. For example, the in the filename in [[https://exercism.org/track/python/guidos-lasagna][Guidos Lasagna]] is
+~lasagna.pw~. With `M-x emacsism-set-exercise-filename` by choosing the source
+file, the value of ~emacism-exercise-filename~ will be ~lasagna~.
