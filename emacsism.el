@@ -151,7 +151,8 @@
   "Download the EXERCISE from the corresponding TRACK.
 Support optional FORCE for update when is not nil."
   (interactive (list (completing-read "Track: " (emacsism--tracks))
-                     (read-string "Exercise: ")))
+                     (read-string "Exercise: ")
+                     current-prefix-arg))
   (let* ((exercise-string (if (symbolp exercise) (symbol-name exercise)
                             exercise))
          (track-string (if (symbolp track) (symbol-name track) track))
